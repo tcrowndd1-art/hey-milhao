@@ -2,9 +2,11 @@
 
 import { useEffect, useRef } from "react";
 
+export type AdVariant = "header" | "in-feed" | "in-article" | "sidebar" | "footer";
+
 type AdSlotProps = {
   slot: string;
-  variant?: "in-article" | "footer" | "header";
+  variant?: AdVariant;
   className?: string;
 };
 
@@ -13,6 +15,22 @@ declare global {
     adsbygoogle?: unknown[];
   }
 }
+
+const variantClass: Record<AdVariant, string> = {
+  header: "min-h-[100px] sm:min-h-[120px]",
+  "in-feed": "min-h-[200px]",
+  "in-article": "min-h-[250px]",
+  sidebar: "min-h-[600px]",
+  footer: "min-h-[250px]",
+};
+
+const variantFormat: Record<AdVariant, string> = {
+  header: "horizontal",
+  "in-feed": "fluid",
+  "in-article": "auto",
+  sidebar: "rectangle",
+  footer: "auto",
+};
 
 export function AdSlot({ slot, variant = "in-article", className = "" }: AdSlotProps) {
   const clientId = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID;
@@ -29,26 +47,29 @@ export function AdSlot({ slot, variant = "in-article", className = "" }: AdSlotP
     }
   }, [clientId]);
 
+  const wrapperClass = `my-6 flex items-center justify-center rounded-xl bg-surface/50 ring-1 ring-line ${variantClass[variant]} ${className}`;
+
   if (!clientId) {
     return (
-      <div
-        className={`my-8 rounded-xl border border-dashed border-line bg-surface p-6 text-center text-xs text-ink-mute ${className}`}
-        aria-hidden="true"
-      >
-        Ad placeholder ({variant})
+      <div className={wrapperClass} aria-hidden="true">
+        <span className="text-xs uppercase tracking-wider text-ink-mute">
+          Ad placeholder · {variant}
+        </span>
       </div>
     );
   }
 
   return (
-    <ins
-      ref={ref}
-      className={`adsbygoogle block my-8 ${className}`}
-      style={{ display: "block" }}
-      data-ad-client={clientId}
-      data-ad-slot={slot}
-      data-ad-format="auto"
-      data-full-width-responsive="true"
-    />
+    <div className={wrapperClass}>
+      <ins
+        ref={ref}
+        className="adsbygoogle block w-full"
+        style={{ display: "block" }}
+        data-ad-client={clientId}
+        data-ad-slot={slot}
+        data-ad-format={variantFormat[variant]}
+        data-full-width-responsive="true"
+      />
+    </div>
   );
 }

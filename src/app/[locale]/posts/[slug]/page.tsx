@@ -63,6 +63,10 @@ export default async function PostPage({
 
   return (
     <article>
+      <div className="mx-auto max-w-content px-4 pt-6">
+        <AdSlot slot="header-1" variant="header" />
+      </div>
+
       <PostHeader
         slug={slug}
         locale={locale}
@@ -71,8 +75,8 @@ export default async function PostPage({
         initialViews={initialViews}
       />
 
-      <div className="mx-auto max-w-content px-4 py-10">
-        <div className="grid gap-12 lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-16">
+      <div className="mx-auto max-w-[80rem] px-4 py-10">
+        <div className="grid gap-12 xl:grid-cols-[200px_minmax(0,1fr)_300px] xl:gap-12 lg:grid-cols-[200px_minmax(0,1fr)] lg:gap-12">
           <TableOfContents items={toc} label={tocLabel[locale]} />
           <div className="min-w-0">
             <MDXContent source={post.content} />
@@ -80,6 +84,9 @@ export default async function PostPage({
               <AdSlot slot="footer-1" variant="footer" />
             </div>
           </div>
+          <aside className="hidden xl:block xl:sticky xl:top-20 xl:self-start">
+            <AdSlot slot="sidebar-1" variant="sidebar" />
+          </aside>
         </div>
       </div>
 
