@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="720" fill="url(#g)"/>
+  <g font-family="ui-monospace, Menlo, Consolas, monospace">
+    <text x="80" y="280" font-size="32" fill="#34d399">$ heymilhao build</text>
+    <text x="80" y="330" font-size="32" fill="#a7f3d0">→ shipping product...</text>
+    <text x="80" y="380" font-size="32" fill="#a7f3d0">→ skipping pretty UI ✓</text>
+    <text x="80" y="430" font-size="32" fill="#34d399">$ _</text>
+  </g>
+  <text x="80" y="600" fill="#ffffff" font-family="Inter, Arial, sans-serif" font-size="64" font-weight="800">Build a CLI, not a dashboard.</text>
+</svg>

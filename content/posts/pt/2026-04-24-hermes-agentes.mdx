@@ -1,0 +1,35 @@
+---
+title: "Por que os agentes Hermes estão derrotando o OpenClovr no enterprise"
+date: "2026-04-24"
+excerpt: "Uma nova geração de agentes orquestrados está silenciosamente vencendo os contratos enterprise que costumavam pertencer às plataformas LLM monolíticas. Eis a razão."
+hero: "/images/posts/hermes.svg"
+locale: "pt"
+---
+
+Durante quase todo o ano de 2025, o mercado enterprise de IA parecia uma corrida entre dois cavalos. A OpenClovr, com seu assistente "tudo em um", dominou as manchetes. A Hermes, com suas malhas de agentes deliberadamente sem graça, dominou as integrações. A distância continuou aumentando — mas no sentido errado para o jogador mais barulhento.
+
+Nesta edição: o que mudou, por que isso importa e o que os builders de São Paulo, Bogotá e Cidade do México deveriam aprender antes de cotar o próximo piloto.
+
+<AdSlot slot="hermes-1" variant="in-article" />
+
+## A virada de "modelo" para "harness"
+
+Os times que estão vencendo os pilotos enterprise não são os que têm o maior modelo. São os que conseguem provar que seu pipeline produz resultados consistentes, independentemente de qual modelo roda por baixo.
+
+Esse é o jogo agora. Os times de procurement pararam de perguntar "qual LLM vocês usam?" e começaram a perguntar "o que acontece quando trocarmos no próximo trimestre?"
+
+Os agentes no estilo Hermes respondem essa pergunta com um dar de ombros e um pipeline de CI verde. A OpenClovr responde com um roadmap.
+
+## Três padrões que aparecem o tempo todo
+
+1. **Prompting com schema primeiro** — cada passo do agente tem entrada e saída tipadas. Alucinações são pegas na fronteira, não em produção.
+2. **Execuções repetíveis** — toda interação é capturada e re-executável, o que significa que QA deixa de ser baseado em "achismo".
+3. **Teto de custo por tarefa** — quando um único passo do agente excede o orçamento, ele é morto e rebaixado, não retentado até o fim do mundo.
+
+Nada disso é empolgante. Tudo isso é a razão pela qual o time de procurement assina.
+
+## O que isso significa para builders latinos
+
+Se você está apresentando um produto de IA para um banco regional, uma operadora de logística ou um varejista com cem lojas, não comece pela escolha do modelo. Comece pela harness. Mostre o output do linter. Mostre a suíte de avaliações. Mostre o gráfico de custo.
+
+O contrato fecha no slide chato.

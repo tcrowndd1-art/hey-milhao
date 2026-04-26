@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="720" fill="url(#g)"/>
+  <g fill="#1f2937" font-family="Inter, Arial, sans-serif">
+    <text x="80" y="320" font-size="96" font-weight="800" letter-spacing="-2">Lifetime Pass.</text>
+    <text x="80" y="420" font-size="96" font-weight="800" letter-spacing="-2" opacity="0.6">Goodbye Churn.</text>
+    <text x="80" y="500" font-size="32" font-weight="500" opacity="0.85">The post-subscription playbook for LatAm SaaS.</text>
+  </g>
+</svg>

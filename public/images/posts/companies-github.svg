@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#7c3aed"/>
+      <stop offset="100%" stop-color="#db2777"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="720" fill="url(#g)"/>
+  <g fill="#ffffff" font-family="ui-monospace, Menlo, Consolas, monospace">
+    <text x="80" y="260" font-size="36" opacity="0.85">$ git fork ./company-1</text>
+    <text x="80" y="320" font-size="36" opacity="0.85">$ git fork ./company-2</text>
+    <text x="80" y="380" font-size="36" opacity="0.85">$ git fork ./company-3</text>
+  </g>
+  <g fill="#ffffff" font-family="Inter, Arial, sans-serif">
+    <text x="80" y="540" font-size="72" font-weight="800" letter-spacing="-2">He doesn&#8217;t push code.</text>
+    <text x="80" y="630" font-size="72" font-weight="800" letter-spacing="-2" opacity="0.85">He pushes companies.</text>
+  </g>
+</svg>

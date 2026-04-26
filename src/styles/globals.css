@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg: 255 255 255;
+    --bg-soft: 247 248 250;
+    --text: 17 24 39;
+    --text-soft: 55 65 81;
+    --text-mute: 107 114 128;
+    --border: 229 231 235;
+    --brand: 16 185 129;
+    --brand-hover: 5 150 105;
+    --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.06);
+  }
+
+  html.dark {
+    --bg: 11 13 16;
+    --bg-soft: 20 23 28;
+    --text: 243 244 246;
+    --text-soft: 209 213 219;
+    --text-mute: 156 163 175;
+    --border: 35 40 48;
+    --brand: 16 185 129;
+    --brand-hover: 52 211 153;
+    --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.4);
+  }
+
+  html,
+  body {
+    background-color: rgb(var(--bg));
+    color: rgb(var(--text));
+    font-family: theme("fontFamily.sans");
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: inherit;
+  }
+}
+
+.prose-hey {
+  @apply prose prose-lg max-w-prose
+    prose-headings:font-bold prose-headings:tracking-tight
+    prose-headings:text-ink
+    prose-p:text-ink-soft
+    prose-strong:text-ink
+    prose-a:text-brand-500 prose-a:no-underline hover:prose-a:underline
+    prose-img:rounded-xl
+    prose-blockquote:border-l-brand-500
+    prose-blockquote:text-ink-soft
+    prose-code:text-ink
+    dark:prose-invert dark:prose-headings:text-ink dark:prose-p:text-ink-soft
+    dark:prose-strong:text-ink dark:prose-blockquote:text-ink-soft;
+}
