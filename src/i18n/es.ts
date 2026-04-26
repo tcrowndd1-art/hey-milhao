@@ -27,7 +27,12 @@ export const es: Strings = {
   },
   footer: {
     rights: "© {year} Hey Milhao. Todos los derechos reservados.",
+    aboutHeading: "Sobre",
+    contactHeading: "Contacto",
+    pagesHeading: "Páginas",
     about: "Acerca de",
     privacy: "Privacidad",
+    feed: "Feed RSS",
+    emailLabel: "Escríbenos",
   },
 };

@@ -25,8 +25,13 @@ export const pt = {
   },
   footer: {
     rights: "© {year} Hey Milhão. Todos os direitos reservados.",
+    aboutHeading: "Sobre",
+    contactHeading: "Contato",
+    pagesHeading: "Páginas",
     about: "Sobre",
     privacy: "Privacidade",
+    feed: "Feed RSS",
+    emailLabel: "Escreva para nós",
   },
 };
 
