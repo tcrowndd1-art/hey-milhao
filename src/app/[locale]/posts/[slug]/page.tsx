@@ -3,12 +3,19 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getAllPostSlugs, getPostBySlug, getRelatedPosts } from "@/lib/posts";
 import { getViews } from "@/lib/redis";
+import { extractToc } from "@/lib/toc";
 import { PostHeader } from "@/components/PostHeader";
 import { MDXContent } from "@/components/MDXContent";
 import { AdSlot } from "@/components/AdSlot";
 import { PostCard } from "@/components/PostCard";
+import { TableOfContents } from "@/components/TableOfContents";
 import { getStrings } from "@/i18n";
 import { SUPPORTED_LOCALES, isLocale } from "@/lib/locale";
+
+const tocLabel = {
+  pt: "Neste texto",
+  es: "En este texto",
+} as const;
 
 export function generateStaticParams() {
   return SUPPORTED_LOCALES.flatMap((locale) =>
@@ -52,6 +59,7 @@ export default async function PostPage({
   const t = getStrings(locale);
   const initialViews = await getViews(slug);
   const related = getRelatedPosts(locale, slug);
+  const toc = extractToc(post.content);
 
   return (
     <article>
@@ -62,18 +70,25 @@ export default async function PostPage({
         content={post.content}
         initialViews={initialViews}
       />
-      <MDXContent source={post.content} />
 
-      <div className="mx-auto max-w-prose px-4">
-        <AdSlot slot="footer-1" variant="footer" />
+      <div className="mx-auto max-w-content px-4 py-10">
+        <div className="grid gap-12 lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-16">
+          <TableOfContents items={toc} label={tocLabel[locale]} />
+          <div className="min-w-0">
+            <MDXContent source={post.content} />
+            <div className="mt-10">
+              <AdSlot slot="footer-1" variant="footer" />
+            </div>
+          </div>
+        </div>
       </div>
 
       {related.length > 0 ? (
-        <section className="mx-auto max-w-prose px-4 pb-16 border-t border-line">
+        <section className="mx-auto max-w-content px-4 pb-16 border-t border-line">
           <h2 className="mt-12 text-sm font-semibold uppercase tracking-widest text-ink-mute">
             {t.post.relatedHeading}
           </h2>
-          <div className="mt-6 flex flex-col gap-12">
+          <div className="mt-6 flex flex-col gap-2">
             {related.map((p) => (
               <PostCard key={p.slug} post={p} locale={locale} />
             ))}
