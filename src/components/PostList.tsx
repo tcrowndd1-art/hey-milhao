@@ -10,11 +10,9 @@ export function PostList({ posts, locale }: { posts: Post[]; locale: Locale }) {
       <h2 className="text-sm font-semibold uppercase tracking-widest text-ink-mute">
         {t.home.latestHeading}
       </h2>
-      <div className="mt-6 flex flex-col divide-y divide-line">
+      <div className="mt-6 flex flex-col gap-2">
         {posts.map((post) => (
-          <div key={post.slug} className="py-8 first:pt-0 last:pb-0">
-            <PostCard post={post} locale={locale} />
-          </div>
+          <PostCard key={post.slug} post={post} locale={locale} />
         ))}
       </div>
     </section>

@@ -15,6 +15,7 @@ export type PostFrontmatter = {
   excerpt: string;
   hero?: string;
   locale?: string;
+  category?: string;
 };
 
 export type Post = {
@@ -57,6 +58,7 @@ export function getPostBySlug(locale: Locale, slug: string): Post | null {
       excerpt: fm.excerpt,
       hero: fm.hero,
       locale: fm.locale ?? locale,
+      category: fm.category,
     },
     content,
   };

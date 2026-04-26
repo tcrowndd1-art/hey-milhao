@@ -13,10 +13,15 @@ export function PostCard({ post, locale }: { post: Post; locale: Locale }) {
     <article className="group">
       <Link
         href={`/${locale}/posts/${slug}`}
-        className="grid gap-5 sm:grid-cols-[1fr_240px] sm:gap-6 items-start"
+        className="grid items-start gap-5 rounded-xl p-3 -mx-3 transition-colors hover:bg-surface sm:grid-cols-[1fr_240px] sm:gap-6"
       >
         <div className="order-2 sm:order-1">
-          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-ink group-hover:text-brand-500 transition-colors">
+          {frontmatter.category ? (
+            <p className="text-xs font-semibold uppercase tracking-wider text-brand-500">
+              {frontmatter.category}
+            </p>
+          ) : null}
+          <h2 className="mt-1.5 text-xl font-bold tracking-tight text-ink transition-colors group-hover:text-brand-500 sm:text-2xl">
             {frontmatter.title}
           </h2>
           <p className="mt-2 line-clamp-2 text-ink-soft">{frontmatter.excerpt}</p>
@@ -38,11 +43,11 @@ export function PostCard({ post, locale }: { post: Post; locale: Locale }) {
                 alt={frontmatter.title}
                 fill
                 sizes="(max-width: 640px) 100vw, 240px"
-                className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
               />
             </div>
           ) : (
-            <div className="aspect-[16/9] w-full rounded-xl bg-gradient-to-br from-brand-100 to-brand-50 ring-1 ring-line dark:from-brand-900 dark:to-brand-800" />
+            <div className="aspect-[16/9] w-full rounded-xl bg-gradient-to-br from-brand-100 to-brand-50 ring-1 ring-line dark:from-brand-900/40 dark:to-brand-800/20" />
           )}
         </div>
       </Link>
