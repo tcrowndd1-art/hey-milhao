@@ -2,7 +2,7 @@ import { getStrings } from "@/i18n";
 import type { Locale } from "@/lib/locale";
 
 /** Update this to your real Telegram invite link */
-const TELEGRAM_URL = "https://t.me/heymilhao";
+const TELEGRAM_URL = "https://t.me/+0ahaJPA31e8xNTIx";
 const CONTACT_EMAIL = "biznasdaq@gmail.com";
 
 export function Community({ locale }: { locale: Locale }) {

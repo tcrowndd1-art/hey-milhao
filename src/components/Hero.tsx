@@ -9,7 +9,7 @@ import type { Locale } from "@/lib/locale";
  */
 const AUTHOR_IMG = "/images/author.svg";
 
-const TELEGRAM_URL = "https://t.me/heymilhao";
+const TELEGRAM_URL = "https://t.me/+0ahaJPA31e8xNTIx";
 const CONTACT_EMAIL = "biznasdaq@gmail.com";
 
 type HeroProps = { locale: Locale; postsCount: number };
