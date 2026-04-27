@@ -73,21 +73,21 @@ export function TableOfContents({
   /* ── Sidebar variant (no wrapper — parent aside handles sticky) ── */
   return (
     <>
-      <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-ink-mute">
+      <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-ink-mute mb-1">
         {label}
       </p>
       <nav className="mt-3">
-        <ul className="space-y-1.5 border-l border-line text-sm">
+        <ul className="space-y-0.5 border-l-2 border-line">
           {items.map((item) => {
             const active = activeId === item.id;
             return (
-              <li key={item.id} className={item.level === 3 ? "pl-2" : ""}>
+              <li key={item.id} className={item.level === 3 ? "pl-3" : ""}>
                 <a
                   href={`#${item.id}`}
-                  className={`block border-l-2 -ml-px py-1 pl-3 text-[13px] leading-snug transition-colors ${
+                  className={`block border-l-2 -ml-px py-1.5 pl-3.5 text-[14px] leading-snug transition-colors ${
                     active
                       ? "border-brand-500 text-ink font-semibold"
-                      : "border-transparent text-ink-mute hover:text-ink hover:border-line"
+                      : "border-transparent text-ink-soft hover:text-ink hover:border-brand-400"
                   }`}
                 >
                   {item.text}
