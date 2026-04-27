@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { TopNav } from "@/components/TopNav";
 import { Footer } from "@/components/Footer";
+import { FloatingThemeToggle } from "@/components/FloatingThemeToggle";
 import { SUPPORTED_LOCALES, isLocale } from "@/lib/locale";
 
 export function generateStaticParams() {
@@ -22,6 +23,7 @@ export default async function LocaleLayout({
       <TopNav locale={locale} />
       <main className="flex-1">{children}</main>
       <Footer locale={locale} />
+      <FloatingThemeToggle />
     </div>
   );
 }

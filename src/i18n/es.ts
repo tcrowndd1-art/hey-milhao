@@ -36,6 +36,7 @@ export const es: Strings = {
     empty: "Sé el primero en comentar.",
     tooFast: "Espera unos segundos antes de comentar de nuevo.",
     error: "Error al enviar. Inténtalo de nuevo.",
+    reply: "Responder",
   },
   community: {
     badge: "Comunidad",

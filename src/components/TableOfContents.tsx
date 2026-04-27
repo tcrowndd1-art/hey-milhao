@@ -41,6 +41,7 @@ export function TableOfContents({
 
   if (items.length === 0) return null;
 
+  /* ── Inline variant (mobile / inside article) ─────────────────── */
   if (variant === "inline") {
     return (
       <nav className="my-8 rounded-2xl border border-line bg-surface/40 p-5">
@@ -69,23 +70,24 @@ export function TableOfContents({
     );
   }
 
+  /* ── Sidebar variant (no wrapper — parent aside handles sticky) ── */
   return (
-    <aside className="hidden lg:block lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
-      <p className="text-xs font-semibold uppercase tracking-wider text-ink-mute">
+    <>
+      <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-ink-mute">
         {label}
       </p>
       <nav className="mt-3">
-        <ul className="space-y-2 border-l border-line text-sm">
+        <ul className="space-y-1.5 border-l border-line text-sm">
           {items.map((item) => {
             const active = activeId === item.id;
             return (
               <li key={item.id} className={item.level === 3 ? "pl-2" : ""}>
                 <a
                   href={`#${item.id}`}
-                  className={`block border-l-2 -ml-px py-1 pl-3 transition-colors ${
+                  className={`block border-l-2 -ml-px py-1 pl-3 text-[13px] leading-snug transition-colors ${
                     active
-                      ? "border-brand-500 text-ink font-medium"
-                      : "border-transparent text-ink-mute hover:text-ink"
+                      ? "border-brand-500 text-ink font-semibold"
+                      : "border-transparent text-ink-mute hover:text-ink hover:border-line"
                   }`}
                 >
                   {item.text}
@@ -95,6 +97,6 @@ export function TableOfContents({
           })}
         </ul>
       </nav>
-    </aside>
+    </>
   );
 }

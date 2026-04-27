@@ -34,6 +34,7 @@ export const pt = {
     empty: "Seja o primeiro a comentar.",
     tooFast: "Aguarde alguns segundos antes de comentar novamente.",
     error: "Erro ao enviar. Tente novamente.",
+    reply: "Responder",
   },
   community: {
     badge: "Comunidade",
