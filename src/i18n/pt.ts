@@ -25,6 +25,23 @@ export const pt = {
     views: "leituras",
     relatedHeading: "Continue lendo",
   },
+  comments: {
+    heading: "Comentários",
+    namePlaceholder: "Seu nome",
+    messagePlaceholder: "Deixe seu comentário…",
+    submit: "Enviar",
+    submitting: "Enviando…",
+    empty: "Seja o primeiro a comentar.",
+    tooFast: "Aguarde alguns segundos antes de comentar novamente.",
+    error: "Erro ao enviar. Tente novamente.",
+  },
+  community: {
+    badge: "Comunidade",
+    heading: "Aprenda IA com quem já fez",
+    body: "Empreendedores e criadores que usam inteligência artificial para construir negócios de sucesso na América Latina. Entre, faça perguntas, compartilhe resultados.",
+    emailCta: "Falar com a gente",
+    telegramCta: "Entrar no Telegram",
+  },
   footer: {
     rights: "© {year} Hey Milhão. Todos os direitos reservados.",
     aboutHeading: "Sobre",

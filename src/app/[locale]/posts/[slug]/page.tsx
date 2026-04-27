@@ -2,13 +2,14 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getAllPostSlugs, getPostBySlug, getRelatedPosts } from "@/lib/posts";
-import { getViews } from "@/lib/redis";
+import { getViews, getComments } from "@/lib/redis";
 import { extractToc } from "@/lib/toc";
 import { PostHeader } from "@/components/PostHeader";
 import { MDXContent } from "@/components/MDXContent";
 import { AdSlot } from "@/components/AdSlot";
 import { PostCard } from "@/components/PostCard";
 import { TableOfContents } from "@/components/TableOfContents";
+import { CommentSection } from "@/components/CommentSection";
 import { getStrings } from "@/i18n";
 import { SUPPORTED_LOCALES, isLocale } from "@/lib/locale";
 
@@ -57,7 +58,10 @@ export default async function PostPage({
   if (!post) notFound();
 
   const t = getStrings(locale);
-  const initialViews = await getViews(slug);
+  const [initialViews, initialComments] = await Promise.all([
+    getViews(slug),
+    getComments(slug),
+  ]);
   const related = getRelatedPosts(locale, slug);
   const toc = extractToc(post.content);
 
@@ -89,6 +93,14 @@ export default async function PostPage({
               variant="inline"
             />
             <MDXContent source={post.content} />
+
+            {/* Comments */}
+            <CommentSection
+              slug={slug}
+              locale={locale}
+              initialComments={initialComments}
+            />
+
             <div className="mt-10">
               <AdSlot slot="footer-post" variant="footer" locale={locale} />
             </div>

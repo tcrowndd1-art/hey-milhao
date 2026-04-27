@@ -2,10 +2,16 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Post } from "@/lib/posts";
 import type { Locale } from "@/lib/locale";
-import { formatDate, estimateReadMinutes } from "@/lib/format";
+import { formatDate, estimateReadMinutes, formatCount } from "@/lib/format";
 import { getStrings } from "@/i18n";
 
-export function PostCard({ post, locale }: { post: Post; locale: Locale }) {
+type PostCardProps = {
+  post: Post;
+  locale: Locale;
+  views?: number;
+};
+
+export function PostCard({ post, locale, views }: PostCardProps) {
   const t = getStrings(locale);
   const { slug, frontmatter, content } = post;
   const minutes = estimateReadMinutes(content);
@@ -33,6 +39,30 @@ export function PostCard({ post, locale }: { post: Post; locale: Locale }) {
             <span>
               {minutes} {t.post.minRead}
             </span>
+            {typeof views === "number" && views > 0 ? (
+              <>
+                <span aria-hidden="true">·</span>
+                {/* Eye icon */}
+                <span className="inline-flex items-center gap-1">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="13"
+                    height="13"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                  {formatCount(views)}
+                </span>
+              </>
+            ) : null}
           </div>
         </div>
         <div className="order-1 sm:order-2">

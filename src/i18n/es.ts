@@ -27,6 +27,23 @@ export const es: Strings = {
     views: "lecturas",
     relatedHeading: "Sigue leyendo",
   },
+  comments: {
+    heading: "Comentarios",
+    namePlaceholder: "Tu nombre",
+    messagePlaceholder: "Deja tu comentario…",
+    submit: "Enviar",
+    submitting: "Enviando…",
+    empty: "Sé el primero en comentar.",
+    tooFast: "Espera unos segundos antes de comentar de nuevo.",
+    error: "Error al enviar. Inténtalo de nuevo.",
+  },
+  community: {
+    badge: "Comunidad",
+    heading: "Aprende IA con quienes ya lo hicieron",
+    body: "Emprendedores y creadores que usan inteligencia artificial para construir negocios exitosos en Latinoamérica. Entra, haz preguntas, comparte resultados.",
+    emailCta: "Hablar con nosotros",
+    telegramCta: "Unirse al Telegram",
+  },
   footer: {
     rights: "© {year} Hey Milhao. Todos los derechos reservados.",
     aboutHeading: "Sobre",
