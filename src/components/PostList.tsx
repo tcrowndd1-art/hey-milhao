@@ -10,9 +10,12 @@ export function PostList({ posts, locale }: { posts: Post[]; locale: Locale }) {
   const t = getStrings(locale);
   return (
     <section className="mx-auto max-w-content px-4 py-12">
-      <h2 className="text-sm font-semibold uppercase tracking-widest text-ink-mute">
+      {/* Section heading with gradient accent */}
+      <h2 className="flex items-center gap-3 text-sm font-semibold uppercase tracking-widest text-ink-mute">
+        <span className="inline-block h-[2px] w-6 rounded-full bg-gradient-to-r from-brand-500 to-teal-400" />
         {t.home.latestHeading}
       </h2>
+
       <div className="mt-6 flex flex-col gap-2">
         {posts.map((post, idx) => (
           <div key={post.slug} className="contents">

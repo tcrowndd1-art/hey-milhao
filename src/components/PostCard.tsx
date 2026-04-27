@@ -17,11 +17,11 @@ export function PostCard({ post, locale }: { post: Post; locale: Locale }) {
       >
         <div className="order-2 sm:order-1">
           {frontmatter.category ? (
-            <p className="text-xs font-semibold uppercase tracking-wider text-brand-500">
+            <span className="inline-flex items-center rounded-full bg-gradient-to-r from-brand-500 to-teal-400 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm">
               {frontmatter.category}
-            </p>
+            </span>
           ) : null}
-          <h2 className="mt-1.5 text-xl font-bold tracking-tight text-ink transition-colors group-hover:text-brand-500 sm:text-2xl">
+          <h2 className="mt-2 text-xl font-bold tracking-tight text-ink transition-colors group-hover:text-brand-500 sm:text-2xl">
             {frontmatter.title}
           </h2>
           <p className="mt-2 line-clamp-2 text-ink-soft">{frontmatter.excerpt}</p>

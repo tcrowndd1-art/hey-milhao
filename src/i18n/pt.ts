@@ -13,6 +13,8 @@ export const pt = {
   hero: {
     posts: "Edições",
     subscribers: "Assinantes",
+    frequency: "Por semana",
+    region: "LATAM",
   },
   home: {
     latestHeading: "Últimas edições",

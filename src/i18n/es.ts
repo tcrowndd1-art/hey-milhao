@@ -15,6 +15,8 @@ export const es: Strings = {
   hero: {
     posts: "Ediciones",
     subscribers: "Suscriptores",
+    frequency: "Por semana",
+    region: "LATAM",
   },
   home: {
     latestHeading: "Últimas ediciones",
