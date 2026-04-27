@@ -24,7 +24,7 @@ const variantClass: Record<AdVariant, string> = {
   header: "min-h-[100px] sm:min-h-[120px]",
   "in-feed": "min-h-[200px]",
   "in-article": "min-h-[250px]",
-  sidebar: "min-h-[420px]",
+  sidebar: "min-h-[320px]",
   footer: "min-h-[200px]",
 };
 
