@@ -38,3 +38,5 @@ next-env.d.ts
 # sitemap (generated)
 /public/sitemap*.xml
 /public/robots.txt
+
+.vercel
