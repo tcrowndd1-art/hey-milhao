@@ -4,7 +4,7 @@ import { AdSlot } from "./AdSlot";
 import { getStrings } from "@/i18n";
 import type { Locale } from "@/lib/locale";
 
-const IN_FEED_AFTER = 2; // insert ad after this many cards
+const IN_FEED_AFTER = 2;
 
 export function PostList({ posts, locale }: { posts: Post[]; locale: Locale }) {
   const t = getStrings(locale);
@@ -18,7 +18,7 @@ export function PostList({ posts, locale }: { posts: Post[]; locale: Locale }) {
           <div key={post.slug} className="contents">
             <PostCard post={post} locale={locale} />
             {idx === IN_FEED_AFTER && idx < posts.length - 1 ? (
-              <AdSlot slot="in-feed-1" variant="in-feed" />
+              <AdSlot slot="in-feed-1" variant="in-feed" locale={locale} />
             ) : null}
           </div>
         ))}

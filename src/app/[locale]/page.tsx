@@ -17,11 +17,11 @@ export default async function HomePage({
     <>
       <Hero locale={locale} postsCount={posts.length} />
       <div className="mx-auto max-w-content px-4 pt-6">
-        <AdSlot slot="header-1" variant="header" />
+        <AdSlot slot="header-home" variant="header" locale={locale} />
       </div>
       <PostList locale={locale} posts={posts} />
       <div className="mx-auto max-w-content px-4 pb-6">
-        <AdSlot slot="footer-home" variant="footer" />
+        <AdSlot slot="footer-home" variant="footer" locale={locale} />
       </div>
     </>
   );

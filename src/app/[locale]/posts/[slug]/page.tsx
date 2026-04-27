@@ -64,7 +64,7 @@ export default async function PostPage({
   return (
     <article>
       <div className="mx-auto max-w-content px-4 pt-6">
-        <AdSlot slot="header-1" variant="header" />
+        <AdSlot slot="header-post" variant="header" locale={locale} />
       </div>
 
       <PostHeader
@@ -75,17 +75,28 @@ export default async function PostPage({
         initialViews={initialViews}
       />
 
-      <div className="mx-auto max-w-[80rem] px-4 py-10">
-        <div className="grid gap-12 xl:grid-cols-[200px_minmax(0,1fr)_300px] xl:gap-12 lg:grid-cols-[200px_minmax(0,1fr)] lg:gap-12">
-          <TableOfContents items={toc} label={tocLabel[locale]} />
-          <div className="min-w-0">
+      <div className="mx-auto max-w-[88rem] px-4 py-10">
+        <div className="grid gap-10 lg:grid-cols-[260px_minmax(0,1fr)_260px] lg:gap-10">
+          <aside className="hidden lg:block lg:sticky lg:top-20 lg:self-start lg:space-y-6">
+            <AdSlot slot="sidebar-left-1" variant="sidebar" locale={locale} />
+            <AdSlot slot="sidebar-left-2" variant="sidebar" locale={locale} />
+          </aside>
+
+          <div className="min-w-0 mx-auto w-full max-w-prose">
+            <TableOfContents
+              items={toc}
+              label={tocLabel[locale]}
+              variant="inline"
+            />
             <MDXContent source={post.content} />
             <div className="mt-10">
-              <AdSlot slot="footer-1" variant="footer" />
+              <AdSlot slot="footer-post" variant="footer" locale={locale} />
             </div>
           </div>
-          <aside className="hidden xl:block xl:sticky xl:top-20 xl:self-start">
-            <AdSlot slot="sidebar-1" variant="sidebar" />
+
+          <aside className="hidden lg:block lg:sticky lg:top-20 lg:self-start lg:space-y-6">
+            <AdSlot slot="sidebar-right-1" variant="sidebar" locale={locale} />
+            <AdSlot slot="sidebar-right-2" variant="sidebar" locale={locale} />
           </aside>
         </div>
       </div>
