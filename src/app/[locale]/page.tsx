@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import { Hero } from "@/components/Hero";
 import { PostList } from "@/components/PostList";
-import { Community } from "@/components/Community";
 import { AdSlot } from "@/components/AdSlot";
 import { getAllPosts } from "@/lib/posts";
 import { getManyViews } from "@/lib/redis";
@@ -27,7 +26,6 @@ export default async function HomePage({
         <AdSlot slot="header-home" variant="header" locale={locale} />
       </div>
       <PostList locale={locale} posts={posts} viewsMap={viewsMap} />
-      <Community locale={locale} />
       <div className="mx-auto max-w-content px-4 pb-6">
         <AdSlot slot="footer-home" variant="footer" locale={locale} />
       </div>
