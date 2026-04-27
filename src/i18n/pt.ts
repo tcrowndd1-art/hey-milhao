@@ -14,7 +14,7 @@ export const pt = {
     posts: "Edições",
     subscribers: "Assinantes",
     frequency: "Por semana",
-    region: "LATAM",
+    region: "América Latina",
   },
   home: {
     latestHeading: "Últimas edições",

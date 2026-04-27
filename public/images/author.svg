@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#065f46"/>
+      <stop offset="50%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#0d9488"/>
+    </linearGradient>
+    <linearGradient id="fig" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#d1fae5" stop-opacity="0.9"/>
+    </linearGradient>
+    <clipPath id="circle">
+      <circle cx="100" cy="100" r="100"/>
+    </clipPath>
+  </defs>
+
+  <!-- Background -->
+  <circle cx="100" cy="100" r="100" fill="url(#bg)"/>
+
+  <!-- Subtle radial glow -->
+  <circle cx="60" cy="50" r="70" fill="white" fill-opacity="0.06"/>
+
+  <!-- Person silhouette — head -->
+  <circle cx="100" cy="78" r="30" fill="url(#fig)"/>
+
+  <!-- Person silhouette — shoulders/body -->
+  <ellipse cx="100" cy="162" rx="52" ry="44" fill="url(#fig)"/>
+
+  <!-- Clip everything to circle -->
+  <rect width="200" height="200" fill="transparent" clip-path="url(#circle)"/>
+</svg>

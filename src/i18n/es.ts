@@ -16,7 +16,7 @@ export const es: Strings = {
     posts: "Ediciones",
     subscribers: "Suscriptores",
     frequency: "Por semana",
-    region: "LATAM",
+    region: "América Latina",
   },
   home: {
     latestHeading: "Últimas ediciones",

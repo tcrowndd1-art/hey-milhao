@@ -79,13 +79,21 @@ export default async function PostPage({
         initialViews={initialViews}
       />
 
+      {/* 3-col grid:
+           mobile       → single column
+           lg  (1024px) → [content | right-sidebar]
+           xl  (1280px) → [left-sidebar | content | right-sidebar]
+      */}
       <div className="mx-auto max-w-[88rem] px-4 py-10">
-        <div className="grid gap-10 lg:grid-cols-[260px_minmax(0,1fr)_260px] lg:gap-10">
-          <aside className="hidden lg:block lg:sticky lg:top-20 lg:self-start lg:space-y-6">
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_240px] xl:grid-cols-[240px_minmax(0,1fr)_240px]">
+
+          {/* Left sidebar — xl+ only */}
+          <aside className="hidden xl:block xl:sticky xl:top-20 xl:self-start xl:space-y-6">
             <AdSlot slot="sidebar-left-1" variant="sidebar" locale={locale} />
             <AdSlot slot="sidebar-left-2" variant="sidebar" locale={locale} />
           </aside>
 
+          {/* Main content */}
           <div className="min-w-0 mx-auto w-full max-w-prose">
             <TableOfContents
               items={toc}
@@ -106,10 +114,12 @@ export default async function PostPage({
             </div>
           </div>
 
+          {/* Right sidebar — lg+ */}
           <aside className="hidden lg:block lg:sticky lg:top-20 lg:self-start lg:space-y-6">
             <AdSlot slot="sidebar-right-1" variant="sidebar" locale={locale} />
             <AdSlot slot="sidebar-right-2" variant="sidebar" locale={locale} />
           </aside>
+
         </div>
       </div>
 
