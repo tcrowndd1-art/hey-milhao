@@ -19,7 +19,7 @@ export default async function LocaleLayout({
   if (!isLocale(locale)) notFound();
 
   return (
-    <div className="flex min-h-screen flex-col bg-page text-ink">
+    <div className="flex min-h-screen flex-col text-ink">
       <TopNav locale={locale} />
       <main className="flex-1">{children}</main>
       <Footer locale={locale} />

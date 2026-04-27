@@ -67,24 +67,17 @@ export default async function PostPage({
 
   return (
     <article>
-      <PostHeader
-        slug={slug}
-        locale={locale}
-        frontmatter={post.frontmatter}
-        content={post.content}
-        initialViews={initialViews}
-      />
-
       {/*
-        3-col: [TOC 260px | prose | ads 240px]
-        mobile: single column (inline TOC above content)
-        lg+   : left TOC sticky + content + right gallery ads
+        3-col starts from the very top so sidebar ads align with the post header:
+        [TOC 260px | prose + header | ads 240px]
+        mobile: single column
+        lg+   : left TOC sticky + content + right gallery ads from top
       */}
-      <div className="mx-auto max-w-[88rem] px-4 py-10">
+      <div className="mx-auto max-w-[88rem] px-4 pt-6 pb-10">
         <div className="grid gap-8 lg:grid-cols-[260px_minmax(0,1fr)_240px] lg:gap-10">
 
-          {/* Left — TOC sidebar (lg+) */}
-          <aside className="hidden lg:block lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-5rem)] lg:overflow-y-auto lg:pr-2">
+          {/* Left — TOC sidebar (lg+), starts empty until below header */}
+          <aside className="hidden lg:block lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-5rem)] lg:overflow-y-auto lg:pr-2 lg:pt-14">
             <TableOfContents
               items={toc}
               label={tocLabel[locale]}
@@ -92,10 +85,18 @@ export default async function PostPage({
             />
           </aside>
 
-          {/* Centre — article content */}
+          {/* Centre — post header + article content */}
           <div className="min-w-0 mx-auto w-full max-w-prose">
+            <PostHeader
+              slug={slug}
+              locale={locale}
+              frontmatter={post.frontmatter}
+              content={post.content}
+              initialViews={initialViews}
+            />
+
             {/* Inline TOC for mobile only */}
-            <div className="lg:hidden">
+            <div className="lg:hidden mt-8">
               <TableOfContents
                 items={toc}
                 label={tocLabel[locale]}
@@ -103,7 +104,9 @@ export default async function PostPage({
               />
             </div>
 
-            <MDXContent source={post.content} />
+            <div className="mt-10">
+              <MDXContent source={post.content} />
+            </div>
 
             <CommentSection
               slug={slug}
@@ -116,7 +119,7 @@ export default async function PostPage({
             </div>
           </div>
 
-          {/* Right — gallery ad panels (lg+) */}
+          {/* Right — gallery ad panels start at top of grid (lg+) */}
           <aside className="hidden lg:block lg:sticky lg:top-20 lg:self-start lg:space-y-6">
             <AdSlot slot="sidebar-right-1" variant="sidebar" locale={locale} />
             <AdSlot slot="sidebar-right-2" variant="sidebar" locale={locale} />

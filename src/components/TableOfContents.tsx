@@ -84,7 +84,7 @@ export function TableOfContents({
               <li key={item.id} className={item.level === 3 ? "pl-3" : ""}>
                 <a
                   href={`#${item.id}`}
-                  className={`block border-l-2 -ml-px py-1.5 pl-3.5 text-[14px] leading-snug transition-colors ${
+                  className={`block border-l-2 -ml-px py-1.5 pl-3.5 text-base leading-snug transition-colors ${
                     active
                       ? "border-brand-500 text-ink font-semibold"
                       : "border-transparent text-ink-soft hover:text-ink hover:border-brand-400"
