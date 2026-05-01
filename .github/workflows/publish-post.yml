@@ -1,0 +1,137 @@
+name: 🤖 AI Content Pipeline
+
+# ─── 3 input methods ───────────────────────────────────────────────────────────
+on:
+  # 1. GitHub Issue with label "publish"
+  issues:
+    types: [opened, labeled]
+
+  # 2. Manual trigger from GitHub Actions UI
+  workflow_dispatch:
+    inputs:
+      source_url:
+        description: "Article URL to fetch and transform"
+        required: false
+        default: ""
+      topic:
+        description: "Topic or angle to write about"
+        required: false
+        default: ""
+      raw_content:
+        description: "Paste raw content / notes here"
+        required: false
+        default: ""
+      category:
+        description: "Category (IA, Negócios, Produto, Founder, Criadores)"
+        required: false
+        default: ""
+
+  # 3. Drop a .md or .txt file into drafts/ and push
+  push:
+    paths:
+      - "drafts/*.md"
+      - "drafts/*.txt"
+
+# ───────────────────────────────────────────────────────────────────────────────
+jobs:
+  generate:
+    # Only run issue trigger if labeled "publish"
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'push' ||
+      (github.event_name == 'issues' && contains(github.event.issue.labels.*.name, 'publish'))
+
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      # ── Method 1: Issue body parsing ──────────────────────────────────────
+      - name: Parse Issue inputs
+        if: github.event_name == 'issues'
+        id: issue
+        run: |
+          BODY="${{ github.event.issue.body }}"
+          # Extract URL (first http line in body)
+          URL=$(echo "$BODY" | grep -oP 'https?://\S+' | head -1 || true)
+          echo "url=$URL" >> $GITHUB_OUTPUT
+          echo "content=$BODY" >> $GITHUB_OUTPUT
+
+      # ── Method 3: Draft file reading ──────────────────────────────────────
+      - name: Read draft file
+        if: github.event_name == 'push'
+        id: draft
+        run: |
+          # Find the newest file in drafts/
+          FILE=$(git diff --name-only HEAD~1 HEAD -- 'drafts/*.md' 'drafts/*.txt' | head -1)
+          if [ -z "$FILE" ]; then
+            echo "No draft file found in this push, skipping."
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "file=$FILE" >> $GITHUB_OUTPUT
+            CONTENT=$(cat "$FILE")
+            # Extract first URL if any
+            URL=$(echo "$CONTENT" | grep -oP 'https?://\S+' | head -1 || true)
+            echo "url=$URL" >> $GITHUB_OUTPUT
+            echo "content<<EOFMARKER" >> $GITHUB_OUTPUT
+            echo "$CONTENT" >> $GITHUB_OUTPUT
+            echo "EOFMARKER" >> $GITHUB_OUTPUT
+          fi
+
+      # ── Run the generator ─────────────────────────────────────────────────
+      - name: Generate post with Claude
+        if: steps.draft.outputs.skip != 'true'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          INPUT_URL: >-
+            ${{ github.event_name == 'workflow_dispatch' && inputs.source_url ||
+                github.event_name == 'issues' && steps.issue.outputs.url ||
+                steps.draft.outputs.url || '' }}
+          INPUT_CONTENT: >-
+            ${{ github.event_name == 'workflow_dispatch' && inputs.raw_content ||
+                github.event_name == 'issues' && steps.issue.outputs.content ||
+                steps.draft.outputs.content || '' }}
+          INPUT_TOPIC: >-
+            ${{ github.event_name == 'workflow_dispatch' && inputs.topic || '' }}
+          INPUT_CATEGORY: >-
+            ${{ github.event_name == 'workflow_dispatch' && inputs.category || '' }}
+        run: node scripts/generate-post.js
+
+      # ── Commit & push the new files ───────────────────────────────────────
+      - name: Commit and push
+        if: steps.draft.outputs.skip != 'true'
+        run: |
+          git config user.name  "Hey Milhão Bot"
+          git config user.email "bot@heymilhao.com"
+          git add content/posts/ public/images/posts/
+          git diff --cached --quiet && echo "Nothing to commit" && exit 0
+          git commit -m "feat(post): ai-generated post $(date +%Y-%m-%d)"
+          git push
+
+      # ── Comment on the Issue with result ──────────────────────────────────
+      - name: Comment on Issue
+        if: github.event_name == 'issues' && steps.draft.outputs.skip != 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '✅ Post gerado e publicado! Vercel está fazendo o deploy agora. Confira em https://hey-milhao.vercel.app em ~1 minuto.'
+            })
