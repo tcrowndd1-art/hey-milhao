@@ -180,10 +180,13 @@ function callClaudeCLI(rawMaterial) {
   console.log("🤖 Calling Claude via `claude` CLI (local mode, no API cost)…");
   const fullPrompt = buildPrompt(rawMaterial);
 
-  const result = spawnSync("claude", ["-p", fullPrompt], {
+  // Pass prompt via stdin to avoid shell-escaping issues with long text
+  const result = spawnSync("claude", ["-p", "--output-format", "text"], {
+    input: fullPrompt,
     encoding: "utf8",
     maxBuffer: 10 * 1024 * 1024,
     timeout: 180_000,
+    shell: true,
   });
 
   if (result.error) {
