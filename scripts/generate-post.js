@@ -50,44 +50,27 @@ async function fetchUrl(url) {
     .slice(0, 12000);
 }
 
-/* ─── SVG hero generator ───────────────────────────────────────── */
-function generateSVG(titlePt, category, colorSeed) {
-  const PALETTES = [
-    ["#059669", "#2dd4bf", "#064e3b"],
-    ["#7c3aed", "#a78bfa", "#2e1065"],
-    ["#0284c7", "#38bdf8", "#0c4a6e"],
-    ["#d97706", "#fbbf24", "#78350f"],
-    ["#dc2626", "#f87171", "#7f1d1d"],
-  ];
-  const [c1, c2, bg] = PALETTES[colorSeed % PALETTES.length];
-  const short = (titlePt || "Post").slice(0, 55);
-  const line1 = short.slice(0, 28);
-  const line2 = short.length > 28 ? short.slice(28) : "";
+/* ─── Pollinations.ai image generator (free, no API key) ──────── */
+async function generateImage(title, category, excerpt, outputPath) {
+  const prompt = [
+    title,
+    category,
+    excerpt ? excerpt.slice(0, 80) : "",
+    "cinematic photography, high quality, 4k, editorial style, dark moody",
+  ].filter(Boolean).join(", ");
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
-  <defs>
-    <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="${bg}"/>
-      <stop offset="100%" stop-color="#0f172a"/>
-    </linearGradient>
-    <linearGradient id="g2" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="${c1}"/>
-      <stop offset="100%" stop-color="${c2}"/>
-    </linearGradient>
-  </defs>
-  <rect width="1200" height="630" fill="url(#g1)"/>
-  <g stroke="rgba(255,255,255,0.05)" stroke-width="1">
-    ${Array.from({ length: 20 }, (_, i) => `<line x1="${i * 63}" y1="0" x2="${i * 63}" y2="630"/>`).join("\n    ")}
-    ${Array.from({ length: 11 }, (_, i) => `<line x1="0" y1="${i * 63}" x2="1200" y2="${i * 63}"/>`).join("\n    ")}
-  </g>
-  <rect x="80" y="260" width="160" height="4" rx="2" fill="url(#g2)"/>
-  <text x="80" y="240" font-family="Inter,system-ui,sans-serif" font-size="22" font-weight="600" fill="${c1}" letter-spacing="3">${(category || "IA").toUpperCase()}</text>
-  <text x="80" y="320" font-family="Inter,system-ui,sans-serif" font-size="48" font-weight="800" fill="white" opacity="0.95">${line1}</text>
-  ${line2 ? `<text x="80" y="380" font-family="Inter,system-ui,sans-serif" font-size="48" font-weight="800" fill="white" opacity="0.95">${line2}</text>` : ""}
-  <text x="80" y="560" font-family="Inter,system-ui,sans-serif" font-size="20" fill="rgba(255,255,255,0.4)">hey-milhao.vercel.app</text>
-  <circle cx="1050" cy="120" r="200" fill="${c1}" opacity="0.08"/>
-  <circle cx="1050" cy="120" r="120" fill="${c2}" opacity="0.06"/>
-</svg>`;
+  const url =
+    "https://image.pollinations.ai/prompt/" +
+    encodeURIComponent(prompt) +
+    "?width=1200&height=630&nologo=true&seed=" +
+    Math.floor(Math.random() * 9999);
+
+  console.log(`🎨 Generating image via Pollinations.ai…`);
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Pollinations failed: ${res.status}`);
+  const buf = Buffer.from(await res.arrayBuffer());
+  fs.writeFileSync(outputPath, buf);
+  console.log(`🖼️  Image saved: ${outputPath} (${(buf.length / 1024).toFixed(0)}KB)`);
 }
 
 /* ─── Style guide (cached by Claude) ──────────────────────────── */
@@ -200,21 +183,19 @@ Return ONLY a raw JSON object (no markdown fences) with this exact shape:
   }
 
   const date = todayISO();
-  const colorSeed = Math.floor(Math.random() * 5);
 
   for (const lang of ["pt", "es"]) {
     const post = parsed[lang];
     if (!post) throw new Error(`Missing "${lang}" in Claude response`);
 
     const postSlug = `${date}-${slugify(post.slug || post.title)}`;
-    const imageName = `${postSlug}.svg`;
+    const imageName = `${postSlug}.jpg`;
     const imagePath = `/images/posts/${imageName}`;
 
-    // Write SVG
-    const svgDir = path.join(ROOT, "public", "images", "posts");
-    fs.mkdirSync(svgDir, { recursive: true });
-    fs.writeFileSync(path.join(svgDir, imageName), generateSVG(post.title, post.category, colorSeed));
-    console.log(`🖼️  SVG: ${imagePath}`);
+    // Generate AI image via Pollinations.ai
+    const imgDir = path.join(ROOT, "public", "images", "posts");
+    fs.mkdirSync(imgDir, { recursive: true });
+    await generateImage(post.title, post.category, post.excerpt, path.join(imgDir, imageName));
 
     // Inject real adslot ID
     const body = (post.body || "").replace(/ADSLOT_ID/g, postSlug);
