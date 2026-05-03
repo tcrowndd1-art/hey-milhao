@@ -2,21 +2,26 @@
 /**
  * Hey Milhão — AI Content Pipeline
  *
- * Reads input from env vars (set by GitHub Actions), calls Claude API,
- * and writes MDX files + SVG hero images to content/posts/{pt,es}/.
+ * Two execution modes (auto-detected):
+ *   LOCAL  — no ANTHROPIC_API_KEY → uses `claude -p` CLI (free, Claude Code subscription)
+ *   CI/CD  — ANTHROPIC_API_KEY set → uses Anthropic SDK (GitHub Actions)
  *
- * ENV vars expected:
- *   ANTHROPIC_API_KEY   — required
+ * ENV vars:
+ *   ANTHROPIC_API_KEY   — optional; triggers SDK mode when set
  *   INPUT_URL           — article URL to fetch and transform
  *   INPUT_CONTENT       — raw text / notes to transform
- *   INPUT_TOPIC         — topic / angle (used as supplement or sole input)
+ *   INPUT_TOPIC         — topic / angle
  *   INPUT_CATEGORY      — optional category override
+ *
+ * Usage (local terminal):
+ *   INPUT_URL=https://... node scripts/generate-post.js
+ *   INPUT_TOPIC="GPT-5 vs Gemini" node scripts/generate-post.js
  */
 
 /* global require, process, __dirname */
-const Anthropic = require("@anthropic-ai/sdk");
 const fs = require("fs");
 const path = require("path");
+const { spawnSync } = require("child_process");
 
 const ROOT = path.resolve(__dirname, "..");
 
@@ -73,7 +78,7 @@ async function generateImage(title, category, excerpt, outputPath) {
   console.log(`🖼️  Image saved: ${outputPath} (${(buf.length / 1024).toFixed(0)}KB)`);
 }
 
-/* ─── Style guide (cached by Claude) ──────────────────────────── */
+/* ─── Style guide ──────────────────────────────────────────────── */
 const STYLE_GUIDE = `STYLE GUIDE — Hey Milhão newsletter (maily.so/josh style):
 
 STRUCTURE:
@@ -100,48 +105,49 @@ LANGUAGES:
 - PT: Brazilian Portuguese — informal but smart. "você", not "tu".
 - ES: Latin American Spanish — same register. Avoid Spain-specific slang.`;
 
-/* ─── main ─────────────────────────────────────────────────────── */
-async function main() {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) throw new Error("ANTHROPIC_API_KEY not set");
+/* ─── Build the user prompt ────────────────────────────────────── */
+function buildPrompt(rawMaterial) {
+  return `${STYLE_GUIDE}
 
-  const inputUrl = (process.env.INPUT_URL || "").trim();
-  const inputContent = (process.env.INPUT_CONTENT || "").trim();
-  const inputTopic = (process.env.INPUT_TOPIC || "").trim();
-  const inputCategory = (process.env.INPUT_CATEGORY || "").trim();
+---
 
-  if (!inputUrl && !inputContent && !inputTopic) {
-    throw new Error("Set at least one of: INPUT_URL, INPUT_CONTENT, INPUT_TOPIC");
+Transform the following material into TWO newsletter posts — Brazilian Portuguese (PT) and Latin American Spanish (ES) — following the style guide above exactly.
+
+MATERIAL:
+${rawMaterial}
+
+Return ONLY a raw JSON object (no markdown fences) with this exact shape:
+{
+  "pt": {
+    "title": "...",
+    "excerpt": "one-sentence teaser, max 160 chars",
+    "category": "...",
+    "slug": "url-safe-lowercase-hyphens-no-accents-max-50-chars",
+    "body": "full MDX body with H2/H3 and one AdSlot"
+  },
+  "es": {
+    "title": "...",
+    "excerpt": "...",
+    "category": "...",
+    "slug": "...",
+    "body": "..."
   }
+}`;
+}
 
-  // 1. Gather raw material
-  let rawMaterial = "";
-  if (inputUrl) {
-    console.log(`⬇️  Fetching ${inputUrl}…`);
-    rawMaterial += `SOURCE URL: ${inputUrl}\n\nCONTENT:\n${await fetchUrl(inputUrl)}\n\n`;
-  }
-  if (inputContent) rawMaterial += `RAW CONTENT / NOTES:\n${inputContent}\n\n`;
-  if (inputTopic) rawMaterial += `TOPIC / ANGLE:\n${inputTopic}\n\n`;
-  if (inputCategory) rawMaterial += `CATEGORY: ${inputCategory}\n\n`;
-
-  // 2. Call Claude with prompt caching
+/* ─── Claude via SDK (CI/GitHub Actions) ──────────────────────── */
+async function callClaudeSDK(rawMaterial) {
+  const Anthropic = require("@anthropic-ai/sdk");
   const client = new Anthropic();
-  console.log("🤖 Calling Claude…");
+  console.log("🤖 Calling Claude via SDK…");
 
   const response = await client.messages.create({
     model: "claude-opus-4-5",
     max_tokens: 4096,
-    system: [
-      {
-        type: "text",
-        text: STYLE_GUIDE,
-        cache_control: { type: "ephemeral" },
-      },
-    ],
-    messages: [
-      {
-        role: "user",
-        content: `Transform the following material into TWO newsletter posts — Brazilian Portuguese (PT) and Latin American Spanish (ES) — following the style guide exactly.
+    system: [{ type: "text", text: STYLE_GUIDE, cache_control: { type: "ephemeral" } }],
+    messages: [{
+      role: "user",
+      content: `Transform the following material into TWO newsletter posts — Brazilian Portuguese (PT) and Latin American Spanish (ES) — following the style guide exactly.
 
 MATERIAL:
 ${rawMaterial}
@@ -163,12 +169,69 @@ Return ONLY a raw JSON object (no markdown fences) with this exact shape:
     "body": "..."
   }
 }`,
-      },
-    ],
+    }],
   });
 
+  return response.content[0].text.trim();
+}
+
+/* ─── Claude via CLI (local terminal, free) ────────────────────── */
+function callClaudeCLI(rawMaterial) {
+  console.log("🤖 Calling Claude via `claude` CLI (local mode, no API cost)…");
+  const fullPrompt = buildPrompt(rawMaterial);
+
+  const result = spawnSync("claude", ["-p", fullPrompt], {
+    encoding: "utf8",
+    maxBuffer: 10 * 1024 * 1024,
+    timeout: 180_000,
+  });
+
+  if (result.error) {
+    throw new Error(
+      `Failed to run claude CLI: ${result.error.message}\n` +
+      `Make sure 'claude' is installed and you're logged in (run: claude login)`
+    );
+  }
+  if (result.status !== 0) {
+    throw new Error(`claude CLI exited with status ${result.status}:\n${result.stderr}`);
+  }
+
+  return result.stdout.trim();
+}
+
+/* ─── main ─────────────────────────────────────────────────────── */
+async function main() {
+  const inputUrl      = (process.env.INPUT_URL      || "").trim();
+  const inputContent  = (process.env.INPUT_CONTENT  || "").trim();
+  const inputTopic    = (process.env.INPUT_TOPIC    || "").trim();
+  const inputCategory = (process.env.INPUT_CATEGORY || "").trim();
+
+  if (!inputUrl && !inputContent && !inputTopic) {
+    throw new Error(
+      "Set at least one of: INPUT_URL, INPUT_CONTENT, INPUT_TOPIC\n\n" +
+      "Examples:\n" +
+      "  INPUT_URL=https://example.com/article node scripts/generate-post.js\n" +
+      "  INPUT_TOPIC=\"OpenAI lança GPT-5\" node scripts/generate-post.js"
+    );
+  }
+
+  // 1. Gather raw material
+  let rawMaterial = "";
+  if (inputUrl) {
+    console.log(`⬇️  Fetching ${inputUrl}…`);
+    rawMaterial += `SOURCE URL: ${inputUrl}\n\nCONTENT:\n${await fetchUrl(inputUrl)}\n\n`;
+  }
+  if (inputContent)  rawMaterial += `RAW CONTENT / NOTES:\n${inputContent}\n\n`;
+  if (inputTopic)    rawMaterial += `TOPIC / ANGLE:\n${inputTopic}\n\n`;
+  if (inputCategory) rawMaterial += `CATEGORY: ${inputCategory}\n\n`;
+
+  // 2. Call Claude — auto-detect mode
+  const useSDK = Boolean(process.env.ANTHROPIC_API_KEY);
+  const rawText = useSDK
+    ? await callClaudeSDK(rawMaterial)
+    : callClaudeCLI(rawMaterial);
+
   // 3. Parse response
-  const rawText = response.content[0].text.trim();
   let parsed;
   try {
     const cleaned = rawText
@@ -182,6 +245,7 @@ Return ONLY a raw JSON object (no markdown fences) with this exact shape:
     throw err;
   }
 
+  // 4. Write files
   const date = todayISO();
 
   for (const lang of ["pt", "es"]) {
@@ -220,7 +284,8 @@ ${body}
     console.log(`✅ ${lang.toUpperCase()}: ${mdxPath}`);
   }
 
-  console.log("\n🎉 Done — Vercel will deploy automatically on next push.");
+  console.log("\n🎉 Done! Commit and push to deploy:");
+  console.log(`   git add content/posts public/images/posts && git commit -m "post: ${todayISO()}" && git push`);
 }
 
 main().catch((err) => {
