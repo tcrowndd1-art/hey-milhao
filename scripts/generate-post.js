@@ -2,26 +2,26 @@
 /**
  * Hey Milhão — AI Content Pipeline
  *
- * Two execution modes (auto-detected):
- *   LOCAL  — no ANTHROPIC_API_KEY → uses `claude -p` CLI (free, Claude Code subscription)
- *   CI/CD  — ANTHROPIC_API_KEY set → uses Anthropic SDK (GitHub Actions)
+ * Execution modes (auto-detected in priority order):
+ *   1. ANTHROPIC_API_KEY set → Anthropic SDK (CI/GitHub Actions)
+ *   2. OPENROUTER_API_KEY set → OpenRouter API, free models (Hermes/local)
+ *   3. fallback → `claude -p` CLI (Claude Code subscription, has monthly limit)
  *
  * ENV vars:
- *   ANTHROPIC_API_KEY   — optional; triggers SDK mode when set
+ *   ANTHROPIC_API_KEY   — triggers Anthropic SDK mode
+ *   OPENROUTER_API_KEY  — triggers OpenRouter mode (free, recommended for local)
+ *   OPENROUTER_MODEL    — optional model override (default: google/gemma-4-31b-it:free)
  *   INPUT_URL           — article URL to fetch and transform
  *   INPUT_CONTENT       — raw text / notes to transform
  *   INPUT_TOPIC         — topic / angle
  *   INPUT_CATEGORY      — optional category override
- *
- * Usage (local terminal):
- *   INPUT_URL=https://... node scripts/generate-post.js
- *   INPUT_TOPIC="GPT-5 vs Gemini" node scripts/generate-post.js
  */
 
 /* global require, process, __dirname */
 const fs = require("fs");
 const path = require("path");
 const { spawnSync } = require("child_process");
+const { jsonrepair } = require("jsonrepair");
 
 const ROOT = path.resolve(__dirname, "..");
 
@@ -116,23 +116,14 @@ Transform the following material into TWO newsletter posts — Brazilian Portugu
 MATERIAL:
 ${rawMaterial}
 
-Return ONLY a raw JSON object (no markdown fences) with this exact shape:
-{
-  "pt": {
-    "title": "...",
-    "excerpt": "one-sentence teaser, max 160 chars",
-    "category": "...",
-    "slug": "url-safe-lowercase-hyphens-no-accents-max-50-chars",
-    "body": "full MDX body with H2/H3 and one AdSlot"
-  },
-  "es": {
-    "title": "...",
-    "excerpt": "...",
-    "category": "...",
-    "slug": "...",
-    "body": "..."
-  }
-}`;
+CRITICAL OUTPUT RULES:
+- Return ONLY a raw JSON object. No markdown fences. No text before or after.
+- In the "body" field: use \\n for newlines, escape any double-quotes as \\". Do NOT use actual newlines inside JSON string values.
+- Body should use ## and ### for headings (written as literal text inside the JSON string).
+- Keep body under 900 words total.
+
+JSON shape (fill in the actual content):
+{"pt":{"title":"...","excerpt":"one-sentence teaser max 160 chars","category":"...","slug":"url-safe-lowercase-hyphens-no-accents-max-50-chars","body":"paragraph\\n\\n## Heading\\n\\n### Sub\\n\\nparagraph\\n\\n<AdSlot slot=\\"ADSLOT_ID\\" variant=\\"in-article\\" />\\n\\n## Heading2\\n\\n### Sub2\\n\\nparagraph\\n\\n## O que eu faria\\n\\nparagraph"},"es":{"title":"...","excerpt":"...","category":"...","slug":"...","body":"..."}}`;
 }
 
 /* ─── Claude via SDK (CI/GitHub Actions) ──────────────────────── */
@@ -173,6 +164,61 @@ Return ONLY a raw JSON object (no markdown fences) with this exact shape:
   });
 
   return response.content[0].text.trim();
+}
+
+/* ─── OpenRouter API (free models, no Claude subscription needed) ── */
+async function callOpenRouter(rawMaterial) {
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  // Try models in order until one works
+  // deepseek-chat = paid but ~$0.001/post — uses existing OpenRouter credits
+  const models = process.env.OPENROUTER_MODEL
+    ? [process.env.OPENROUTER_MODEL]
+    : [
+        "deepseek/deepseek-chat",
+        "google/gemma-4-26b-a4b-it:free",
+        "minimax/minimax-m2.5:free",
+        "google/gemma-4-31b-it:free",
+      ];
+
+  const userPrompt = buildPrompt(rawMaterial).split("---\n\n").slice(1).join("---\n\n");
+
+  for (const model of models) {
+    console.log(`[hey-milhao] Trying OpenRouter model: ${model}...`);
+    const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": "https://heymilhao.com",
+        "X-Title": "Hey Milhao Pipeline",
+      },
+      body: JSON.stringify({
+        model,
+        max_tokens: 8192,
+        messages: [
+          { role: "system", content: STYLE_GUIDE },
+          { role: "user",   content: userPrompt },
+        ],
+      }),
+    });
+
+    if (res.status === 429) {
+      console.log(`[hey-milhao] ${model} rate-limited, trying next...`);
+      continue;
+    }
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(`OpenRouter error ${res.status}: ${err}`);
+    }
+    const data = await res.json();
+    const content = data.choices?.[0]?.message?.content;
+    if (!content) {
+      console.log(`[hey-milhao] ${model} returned empty content, trying next...`);
+      continue;
+    }
+    return content.trim();
+  }
+  throw new Error("All OpenRouter free models rate-limited or unavailable. Try again in a few minutes.");
 }
 
 /* ─── Claude via CLI (local terminal, free) ────────────────────── */
@@ -228,23 +274,53 @@ async function main() {
   if (inputTopic)    rawMaterial += `TOPIC / ANGLE:\n${inputTopic}\n\n`;
   if (inputCategory) rawMaterial += `CATEGORY: ${inputCategory}\n\n`;
 
-  // 2. Call Claude — auto-detect mode
-  const useSDK = Boolean(process.env.ANTHROPIC_API_KEY);
-  const rawText = useSDK
-    ? await callClaudeSDK(rawMaterial)
-    : callClaudeCLI(rawMaterial);
+  // 2. Call AI — priority: Anthropic SDK → Claude CLI → OpenRouter fallback
+  let rawText;
+  if (process.env.ANTHROPIC_API_KEY) {
+    rawText = await callClaudeSDK(rawMaterial);
+  } else {
+    // Try Claude CLI first (free subscription)
+    try {
+      rawText = callClaudeCLI(rawMaterial);
+      console.log("[hey-milhao] Engine: Claude CLI (subscription)");
+    } catch (cliErr) {
+      // CLI failed — check if OpenRouter fallback available
+      if (!process.env.OPENROUTER_API_KEY) throw cliErr;
 
-  // 3. Parse response
+      const reason = cliErr.message.includes("monthly") ? "monthly limit reached"
+        : cliErr.message.includes("ENOENT")             ? "claude CLI not found"
+        : "CLI error";
+
+      console.log(`[hey-milhao] Claude CLI unavailable (${reason})`);
+      console.log("[hey-milhao] >> Falling back to OpenRouter...");
+      rawText = await callOpenRouter(rawMaterial);
+    }
+  }
+
+  // 3. Parse response — with auto-repair for common LLM JSON issues
   let parsed;
   try {
-    const cleaned = rawText
+    let cleaned = rawText
       .replace(/^```json\s*/i, "")
       .replace(/^```\s*/i, "")
       .replace(/```\s*$/i, "")
       .trim();
-    parsed = JSON.parse(cleaned);
+
+    // Extract first {...} block if there's preamble text
+    if (!cleaned.startsWith("{")) {
+      const match = cleaned.match(/\{[\s\S]*\}/);
+      if (match) cleaned = match[0];
+    }
+
+    // Try direct parse first, then auto-repair (handles unescaped quotes, truncation etc.)
+    try {
+      parsed = JSON.parse(cleaned);
+    } catch {
+      console.log("[hey-milhao] JSON malformed, attempting auto-repair...");
+      parsed = JSON.parse(jsonrepair(cleaned));
+    }
   } catch (err) {
-    console.error("❌ Claude response is not valid JSON:\n", rawText.slice(0, 500));
+    console.error("[hey-milhao] Response could not be parsed as JSON:\n", rawText.slice(0, 500));
     throw err;
   }
 
